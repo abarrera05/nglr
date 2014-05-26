@@ -1,4 +1,10 @@
-# nglr Syllabus
+# nglr syllabus
+
+## Daily logistics
+
+* Take roll.
+
+## Entire class outline 
 
 * Build a historical example using `walkthroughs/hello`.
     * Do dom manipulation, AJAX, etc.
