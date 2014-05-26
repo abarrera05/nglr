@@ -1,6 +1,6 @@
 # Lab
 
-Build a simple chat client.
+Finish off this simple chat client.
 
 Find the `TODO` locations in:
 

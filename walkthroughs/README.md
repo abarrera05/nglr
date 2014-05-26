@@ -1,2 +1,1 @@
-Starting point for the walkthrough.
-
+Starting point for the walkthroughs.
