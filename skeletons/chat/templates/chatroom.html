@@ -1,0 +1,20 @@
+<p>Welcome to the chatroom {{profile.name}}.</p>
+<form id="chat-form" class="form-inline" ng-submit="chat()">
+    <input ng-model="profile.name" name="user" type="hidden"/>
+    <div class="form-group message-group">
+        <label class="sr-only">Message</label>
+
+        <!-- TODO: add bound input to allow submission of message. -->
+
+    </div><!--
+ --><div class="form-group submit-group">
+        <input type="submit" class="btn btn-default" value="send"/>
+    </div>
+</form>
+<ul>
+    <li class="message-container">
+
+        <!-- TODO: allow display of message history as list. -->
+
+    </li>
+</ul>
