@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular-route.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular-resource.min.js"></script>
+    <style>
+        .selected-true {
+            background: yellow;
+        }
+    </style>
+</head>
+<body>
+<div ng-app="contactApp">
+    <h2>Contacts</h2>
+    <div ng-controller="ContactsCtrl" >
+        <ul>
+            <li ng-repeat="contact in contacts">
+                <a href="#/contact/{{contact.id}}">
+                    <span class="selected-{{ selectedContact() == contact }}">
+                        {{ contact | showContact:"alternate" }}
+                    </span>
+                </a>
+                <contact data="contact"></contact>
+            </li>
+        </ul>
+        <button ng-click="addContact()">Add a New Contact</button>
+        <button ng-click="win()">Pick a Winner</button>
+        <hr/>
+        <div ng-view>
+        </div>
+    </div>
+</div>
+
+    <script>
+myContactAppModule = angular.module("contactApp", ["ngRoute", "ngResource"])
+    .config(function($routeProvider) {
+            $routeProvider.when("/", {
+                templateUrl : "detail-none.html"
+            }).when("/contact/:contactId", {
+                        templateUrl : "detail-contact.html"
+                    })
+                    .otherwise({
+                        redirectTo:'/'
+                    });
+    });
+
+myContactAppModule.factory("Contact", ['$resource', function($resource) {
+    return $resource("http://localhost:3000/contact/:id",
+            { id : "@id" });
+}]);
+
+myContactAppModule.filter("displayContact", function() {
+   return function(contact) {
+       function isAlmostEmpty(obj) {
+           for (var k in obj)
+               if (obj.hasOwnProperty(k))
+                   if (k.indexOf("$$") != 0 && k != "id")
+                       return false;
+           return true;
+       }
+
+       if (isAlmostEmpty(contact))
+           return "(no data)";
+       else
+           return contact.first + " " + contact.last + " " + contact.email;
+   };
+});
+
+myContactAppModule.filter("showContact", function($log) {
+    return function(contact, format) {
+        function isAlmostEmpty(obj) {
+            for (var k in obj)
+                if (obj.hasOwnProperty(k))
+                    if (k.indexOf("$$") != 0 && k != "id")
+                        return false;
+            return true;
+        }
+
+        if (isAlmostEmpty(contact))
+            return "(no data)";
+        else if (!format)
+            return contact.first + " " + contact.last + " " + contact.email;
+        else {
+            $log.log("Format was ", format);
+            return contact.last + ", " + contact.first;
+        }
+    };
+});
+
+myContactAppModule.controller("ContactsCtrl", function($scope, $window,
+                                                       $routeParams, Contact,
+                                                       $location) {
+    $scope.contacts = Contact.query();
+
+    $scope.selectedContact = function() {
+        var id = $routeParams.contactId;
+        return $scope.contacts.filter(function(c) { return c.id == id; })[0];
+    };
+
+    $scope.addContact = function() {
+        var newContact = new Contact();
+        newContact.id = "new";
+        $scope.contacts.push(newContact);
+        $location.path("/contact/" + newContact.id);
+    };
+
+    $scope.win = function() {
+        var winnerIndex = Math.floor(Math.random()*$scope.contacts.length);
+        $scope.contacts[winnerIndex].lotteryWinner = true;
+    };
+
+    $scope.$watch("contacts", function(newval, oldval) {
+        $window.console.log("someone became a winner: ", newval, oldval);
+    }, true);
+
+    $scope.removeSelected = function() {
+        var index = $scope.contacts.indexOf($scope.selectedContact());
+        $scope.contacts.splice(index, 1);
+    }
+});
+
+myContactAppModule.controller("ContactDetailCtrl", function($scope) {
+    $scope.startEditing = function() {
+        $scope.editingContactCopy = angular.copy($scope.selectedContact());
+        $scope.isEditing = true;
+    }
+
+    $scope.save = function() {
+        $scope.isEditing = false;
+        angular.copy($scope.editingContactCopy, $scope.selectedContact());
+        var contact = $scope.selectedContact();
+        if (contact.id == "new")
+            delete contact.id;
+        contact.$save();
+    }
+
+    $scope.cancel = function() {
+        $scope.isEditing = false;
+    }
+
+    $scope.delete = function() {
+        $scope.selectedContact().$delete();
+        $scope.removeSelected();
+    }
+});
+
+myContactAppModule.directive('contact', function () {
+    return {
+        restrict : "E",
+        template : "<div style='background-color:#d6cd95;width: 20%;margin-bottom: 1em;'>"
+                    +"{{localContact.first}} {{localContact.last}}<br/>{{localContact.email}}<br/></div>",
+        replace : false,
+        scope : {
+            localContact : '=data'
+        }
+    }
+});
+    </script>
+</body>
+</html>

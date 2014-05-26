@@ -1,0 +1,19 @@
+<div ng-controller="ContactDetailCtrl">
+    <div ng-show="!isEditing">
+        First name: <span>{{ selectedContact().first }}</span><br/>
+        Last name: <span>{{ selectedContact().last }}</span><br/>
+        Email: <span>{{ selectedContact().email }}</span><br/>
+        <button ng-click="startEditing()">Edit</button>
+        <br/>
+        <button ng-click="delete()">Delete</button>
+    </div>
+
+    <div ng-show="isEditing">
+        First name: <input ng-model="editingContactCopy.first"/><br/>
+        Last name: <input ng-model="editingContactCopy.last"/><br/>
+        Email: <input ng-model="editingContactCopy.email"/><br/>
+        <button ng-click="save()">Save</button>
+        <button ng-click="cancel()">Cancel</button>
+
+    </div>
+</div>
