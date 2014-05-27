@@ -18,15 +18,32 @@ This page is not designed to work without JavaScript.
             <h1>Hello</h1>
         </header>
         <section id="page-body">
-            <div>
-
-            </div>
+            <form action="javascript:void(0);">
+            	<input type="text" name="message" id="message"
+            		placeholder="your message please"/>
+            	<input type="submit"/>
+            </form>
         </section>
         <footer id="page-footer">
             Use this code as you wish.
         </footer>
         <script>
-
+$(document).ready(function() {
+	//document.querySelector("form").addEventListener("submit", function() {});
+	$("form").on("submit", function(e) {
+		e.preventDefault();
+		$.ajax("http://bro.jeremyosborne.com/api/echobro")
+			.success(function(data) {
+				//console.log("Hey, got a response", arguments);
+				var prop;
+				var list = $("<ul>").appendTo("body");
+				for (prop in data.headers) {
+					list.append(
+						$("<li>").html(prop + ": " + data.headers[prop]));
+				}
+			});
+	});
+});
         </script>
     </body>
 </html>
