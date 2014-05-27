@@ -27,3 +27,5 @@ node_modules
 # silly mac
 .DS_Store
 
+# silly eclipse/aptana
+.project
