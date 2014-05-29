@@ -38,7 +38,21 @@
         <script>
 
         var app = angular.module("notepadApp", []);
-        
+
+        app.directive("exampleDecoration", function() {
+            return {
+                restrict: "E",
+                templateUrl: "templates/exampledecoration.html",
+                link: function(scope, elem) {
+                    scope.decoration = Math.random() > 0.5 ? true : false;
+                    
+                    elem.on("click", function() {
+                        scope.decoration = !scope.decoration;
+                        scope.$apply();
+                    });
+                }
+            }
+        });    
 
         app.controller("NotepadController", function($scope, $timeout, $http){
             $http.get("/api")
