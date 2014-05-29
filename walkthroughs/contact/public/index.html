@@ -55,6 +55,14 @@
 	   return {
 	       restrict: 'E',
 	       templateUrl: "contact-email.html",
+	       link: function(scope, elem, attrs) {
+	           console.log("Taking a look at scope:", scope);
+	           
+	           elem.on("click", function() {
+	              scope.clicked = "--";
+	              scope.$apply();
+	           });
+	       }
 	   };
 	});
 	

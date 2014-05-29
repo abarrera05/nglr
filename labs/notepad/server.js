@@ -25,7 +25,9 @@ app.post('/api', function(req, res) {
     if (note) {
         notes.push(note);
         // Simple: on success resend notes.
-        res.send(notes);
+        setTimeout(function() {
+            res.send(notes);    
+        }, 1000);
     }
     else {
         res.send(500, {error: "Code not process value of 'note' param of " + note});
