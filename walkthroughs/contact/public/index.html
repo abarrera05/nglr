@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.min.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular-resource.min.js"></script>
     <style>
         .selected-true {
             background: yellow;
@@ -10,25 +12,141 @@
     </style>
 </head>
 <body>
-<div>
+<div ng-app="contactApp">
     <h2>Contacts</h2>
-    <div>
+    <div ng-controller="ContactsCtrl">
+        <h3>{{title}}</h3>
         <ul>
-            <li>
-                <span>
-
-                </span>
+            <li ng-repeat="contact in contacts">
+            	<a href="#/contact/{{contact.id}}">
+	                <span class="selected-{{ selectedContact() == contact }}">
+	                    {{contact.first}} {{contact.last}} {{contact.email}}
+	                </span>
+	                <contact-email></contact-email>
+                </a>
             </li>
         </ul>
+        <input type="button" ng-click="add()" value="Add Contact"/>
+		<div ng-view></div>
     </div>
 </div>
 
 <script>
-    var contacts = [
-            {"first":"Joe","last":"Smith","email":"joe@gmail.com","id":1, company_id:"xyz" },
-            {"first":"Joe2","last":"Smith2","email":"joe2@gmail.com","id":2, company_id:"abc" },
-            {"first":"Joe3","last":"Smith3","email":"joe3@gmail.com","phone":"555-1212","id":3, company_id:"xyz"}
-    ];
+	var contactApp = angular.module("contactApp", ["ngRoute", "ngResource"]);
+
+	contactApp.config(function($routeProvider) {
+		$routeProvider.when("/", {
+			templateUrl: "detail-none.html"
+		}).when("/contact/:contactId", {
+			templateUrl: "detail-contact.html"
+		})
+		.otherwise({
+			redirectTo: "/"
+		});
+	});
+
+	contactApp.factory("Contact", ["$resource", function($resource) {
+		return $resource("http://localhost:3000/contact/:id", {
+			id: "@id"
+		});
+	}]);
+	
+	contactApp.directive("contactEmail", function() {
+	   return {
+	       restrict: 'E',
+	       templateUrl: "contact-email.html",
+	   };
+	});
+	
+	contactApp.filter("showcontact", function(){
+	    return function(contact, format) {
+	        var isAlmostEmpty = function(o){
+	            for (var p in o) {
+	                if (o.hasOwnProperty(p)) {
+	                    if (p.indewOf("$$") !=0 && p != "id") {
+	                        return false;
+	                    }
+	                }
+	            }
+	            return true;
+	        };
+	        if (isAlmostEmpty(contact)) {
+	            return "(no data)"
+	        }
+	        else {
+	            return contact.first + " " + contact.last;
+	        }
+	   };
+	});
+
+	contactApp.controller("ContactDetailsCtrl", ["$scope", function($scope) {
+				$scope.title = "What's up outer scope?";
+
+		$scope.cancel = function() {
+			$scope.showEditForm = false;
+		};
+
+		$scope.save = function() {
+			$scope.showEditForm = false;
+			angular.copy($scope.editingContactCopy, $scope.selectedContact());
+			var contact = $scope.selectedcontact();
+			if (contact.id == "new") {
+			    delete contact.id;
+			}
+			contact.$save();
+		};
+
+		$scope.edit = function() {
+			$scope.showEditForm = true;
+			$scope.editingContactCopy = angular.copy($scope.selectedContact());
+		};
+	}]);
+
+    contactApp.controller("ContactsCtrl",
+    ["$scope", "$routeParams", "$http", "Contact", "$location",
+    function($scope, $routeParams, $http, Contact) {
+        $scope.title = "Master List of Awesome People";
+        
+        /*
+        $scope.contacts = [
+                {"first":"Joe","last":"Smith","email":"joe@gmail.com","id":1, company_id:"xyz" },
+                {"first":"Joe2","last":"Smith2","email":"joe2@gmail.com","id":2, company_id:"abc" },
+                {"first":"Joe3","last":"Smith3","email":"joe3@gmail.com","phone":"555-1212","id":3, company_id:"xyz"}
+        ];
+        */
+        // $scope.contacts = [];
+        // $http.get("/contact")
+        	// .success(function(data) {
+        		// $scope.contacts = data;
+        	// })
+        	// .error(function() {
+        		// console.log("oops, connection error");
+        	// });
+        $scope.contacts = Contact.query();
+        
+        $scope.add = function() {
+            var c = new Contact();
+            c.id = "new";
+            $scope.contacts.push(c);
+            $location.paid("/contact/" + c.id);
+        // 	var contact = {
+        // 		"first": "Gunther",
+        // 		"last": "Bobroy",
+        // 		"email": "gb@gb.com"
+        // 	};
+        // 	$scope.contacts.push(contact);
+        // 	$scope.select(contact);
+        
+        };
+        
+        $scope.selectedContact = function() {
+        	var id = $routeParams.contactId; 
+        	var contact = $scope.contacts.filter(function(c) {
+        		return c.id == id;
+        	})[0];
+        	return contact;
+        };
+    }]);
 </script>
 </body>
 </html>
