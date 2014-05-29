@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en-US" ng-app>
+<html lang="en-US" ng-app="notepadApp>
     <head>
         <meta charset="UTF-8"/>
         <title>Notepad</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet"/>
         <link href="stylesheets/examplestyle.css" rel="stylesheet"/>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script src="http://code.angularjs.org/1.2.10/angular.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://code.angularjs.org/1.2.10/angular.min.js"></script>
     </head>
     <body>
         <noscript>
@@ -20,8 +20,14 @@
         </header>
         <section id="page-body">
             <div ng-controller="NotepadController">
+                <form ng-submit="newNote()">
+                    <input type="text" ng-model="noteForm.text" name="newNote" placeholder="Submite a new note"/>
+                    <input type="submit"/>
+                </form>
                 <ul>
-                     <li ng-repeat="note in notes track by $index">{{note}}</li>
+                    <li ng-repeat="note in notes track by $index">
+                        {{note}}
+                    </li>
                 </ul>
             </div>
             
@@ -31,20 +37,33 @@
         </footer>
         <script>
 
-        var NotepadController = function($scope, $timeout) {
-            $scope.notes = [
-                "Wax on, wax off.",
-                "Sand the floor.",
-                "Paint the house.",
-            ];
+        var app = angular.module("notepadApp", []);
+        
+
+        app.controller("NotepadController", function($scope, $timeout, $http){
+            $http.get("/api")
+                .success(function(data) {
+                    $scope.notes = data;
+                })
+                .error(function() {
+                    concsole.log("oops, something bad.", aruguments);
+                });
             
-            $timeout(function() {
-                $scope.notes.push("Paint the fence.");
-            }, 500);
-    
-        };
+            $scope.newNote = function() {
+                if ($scope.noteform && $scope.noteform.text) {
+                    $http.post("/api", { note: $scope.noteform.text})
+	    		        .success(function(data) {
+	    			        $scope.notes = data;
+	    			        $scope.noteform.text = "";
+	    		        })
+	    		        .error(function(data) {
+	    			        console.log("Something bad happened", data);
+	    		        });
+    	        }
+            };
+              
+        });
 
         </script>
     </body>
 </html>
-
