@@ -10,13 +10,13 @@
     </style>
 </head>
 <body>
-<div>
+<div ng-app>
     <h2>Contacts</h2>
-    <div>
+    <div ng-controller="ContactsCtrl">
         <ul>
-            <li>
+            <li ng-repeat="contact in contacts">
                 <span>
-
+                    {{contact.first}} {{contact.last}} {{contact.email}}
                 </span>
             </li>
         </ul>
@@ -24,11 +24,14 @@
 </div>
 
 <script>
-    var contacts = [
+    var ContactsCtrl = function($scope) {
+      $scope.title = "master list";
+      $scope.contacts = [
             {"first":"Joe","last":"Smith","email":"joe@gmail.com","id":1, company_id:"xyz" },
             {"first":"Joe2","last":"Smith2","email":"joe2@gmail.com","id":2, company_id:"abc" },
             {"first":"Joe3","last":"Smith3","email":"joe3@gmail.com","phone":"555-1212","id":3, company_id:"xyz"}
-    ];
+        ];  
+    };
 </script>
 </body>
 </html>
