@@ -1,0 +1,13 @@
+<form class="form-inline" ng-submit="chat()">
+	<input ng-model="user" placeholder="user"/>
+	<input ng-model="message" placeholder="message"/>
+	<input type="submit" class="btn btn-default" value="send"/>
+</form>
+<ul>
+	<li ng-repeat="historyItem in history" class="message-container">
+		<div class="profile">
+		{{historyItem.user}}<br/>
+		{{historyItem.date | date : longDate}}
+		</div><div class="message">{{historyItem.message}}</div>
+	</li>
+</ul>
